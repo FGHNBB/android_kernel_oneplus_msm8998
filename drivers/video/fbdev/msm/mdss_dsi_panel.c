@@ -26,7 +26,12 @@
 #include "mdss_dsi.h"
 #include "mdss_dba_utils.h"
 #include "mdss_debug.h"
-#include "mdss_livedisplay.h"
+
+#include <linux/clk.h>
+#include <linux/project_info.h>
+#if defined(CONFIG_IRIS2P_FULL_SUPPORT)
+#include "mdss_dsi_iris2p_lightup.h"
+#endif
 
 #define DT_CMD_HDR 6
 #define DEFAULT_MDP_TRANSFER_TIME 14000
@@ -182,7 +187,7 @@ static void mdss_dsi_panel_apply_settings(struct mdss_dsi_ctrl_pdata *ctrl,
 }
 
 
-void mdss_dsi_panel_cmds_send(struct mdss_dsi_ctrl_pdata *ctrl,
+static void mdss_dsi_panel_cmds_send(struct mdss_dsi_ctrl_pdata *ctrl,
 			struct dsi_panel_cmds *pcmds, u32 flags)
 {
 	struct dcs_cmd_req cmdreq;
@@ -218,10 +223,9 @@ static struct dsi_cmd_desc backlight_cmd = {
 };
 static char led_pwm2[3] = {0x51, 0x00, 0x00};/* DTYPE_DCS_LWRITE */
 static struct dsi_cmd_desc backlight_cmd2 = {
-	{DTYPE_DCS_LWRITE, 1, 0, 0, 1, sizeof(led_pwm2)},
-	led_pwm2
+ {DTYPE_DCS_LWRITE, 1, 0, 0, 1, sizeof(led_pwm2)},
+ led_pwm2
 };
-
 static void mdss_dsi_panel_bklt_dcs(struct mdss_dsi_ctrl_pdata *ctrl, int level)
 {
 	struct dcs_cmd_req cmdreq;
@@ -236,28 +240,30 @@ static void mdss_dsi_panel_bklt_dcs(struct mdss_dsi_ctrl_pdata *ctrl, int level)
 	pr_debug("%s: level=%d\n", __func__, level);
 
 	if (ctrl->bklt_max > 255) {
-		u8 ldata;
-		u8 hdata;
+		u8 ldata = 0;
+		u8 hdata = 0;
 
 		if (ctrl->bl_high2bit) {
 			ldata = level & 0x0ff;
 			hdata = (level >> 8) & 0x03;
+			led_pwm2[2] = ldata;
+			led_pwm2[1] = hdata;
 		} else {
 			ldata = level & 0x03;
 			hdata = (level >> 2) & 0x0ff;
+			led_pwm2[2] = ldata;
+			led_pwm2[1] = hdata;
 		}
-
-		led_pwm2[2] = ldata;
-		led_pwm2[1] = hdata;
 	} else {
 		led_pwm1[1] = (unsigned char)level;
 	}
 
 	memset(&cmdreq, 0, sizeof(cmdreq));
-	if (ctrl->bklt_max > 255)
+	if (ctrl->bklt_max > 255) {
 		cmdreq.cmds = &backlight_cmd2;
-	else
+	} else {
 		cmdreq.cmds = &backlight_cmd;
+	}
 	cmdreq.cmds_cnt = 1;
 	cmdreq.flags = CMD_REQ_COMMIT | CMD_CLK_CTRL | CMD_REQ_DCS;
 	cmdreq.rlen = 0;
@@ -533,6 +539,35 @@ exit:
 	return rc;
 }
 
+int mdss_dsi_px_clk_req(struct mdss_panel_data *pdata, int enable)
+{
+	struct mdss_dsi_ctrl_pdata *ctrl_pdata = NULL;
+	int rc = 0;
+
+	if (pdata == NULL) {
+		pr_err("%s: Invalid input data\n", __func__);
+		return -EINVAL;
+	}
+
+	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
+				panel_data);
+	if (enable) {
+		if(!IS_ERR(ctrl_pdata->px_clk_src) && (!ctrl_pdata->px_clk_enabled)){
+			clk_set_rate(ctrl_pdata->px_clk_src, 19200000);
+			rc = clk_prepare_enable(ctrl_pdata->px_clk_src);
+			if (rc){
+				pr_err("px clk_prepare_enable failed, rc=%d\n", rc);
+			}
+			ctrl_pdata->px_clk_enabled = 1;
+		}
+	} else{
+		if(!IS_ERR(ctrl_pdata->px_clk_src) && ctrl_pdata->px_clk_enabled){
+		    clk_disable_unprepare(ctrl_pdata->px_clk_src);
+		    ctrl_pdata->px_clk_enabled = 0;
+		}
+	}
+	return rc;
+}
 int mdss_dsi_disp_vci_en(struct mdss_panel_data *pdata, int enable)
 {
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata = NULL;
@@ -567,6 +602,43 @@ int mdss_dsi_disp_vci_en(struct mdss_panel_data *pdata, int enable)
 	} else {
 	    gpio_set_value(ctrl_pdata->disp_vci_en_gpio, 0);
 	    gpio_free(ctrl_pdata->disp_vci_en_gpio);
+	}
+	return rc;
+}
+int mdss_dsi_isp_1v1_en(struct mdss_panel_data *pdata, int enable)
+{
+	struct mdss_dsi_ctrl_pdata *ctrl_pdata = NULL;
+	struct mdss_panel_info *pinfo = NULL;
+	int rc = 0;
+
+	if (pdata == NULL) {
+		pr_err("%s: Invalid input data\n", __func__);
+		return -EINVAL;
+	}
+
+	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
+				panel_data);
+
+    if (!gpio_is_valid(ctrl_pdata->isp_1v1_en_gpio)) {
+		pr_debug("%s:%d, isp_1v1_en line not configured\n",
+			   __func__, __LINE__);
+		return rc;
+	}
+	pr_debug("%s: isp_1v1_en enable = %d\n", __func__, enable);
+	pinfo = &(ctrl_pdata->panel_data.panel_info);
+
+	if (enable) {
+	    rc = gpio_request(ctrl_pdata->isp_1v1_en_gpio,
+					"isp_1v1_en_gpio");
+		if (rc) {
+			pr_err("request isp_1v1 gpio failed, rc=%d\n",
+				       rc);
+			return rc;
+		}
+	rc = gpio_direction_output(ctrl_pdata->isp_1v1_en_gpio, 1);
+	} else {
+	    gpio_set_value((ctrl_pdata->isp_1v1_en_gpio), 0);
+	    gpio_free(ctrl_pdata->isp_1v1_en_gpio);
 	}
 	return rc;
 }
@@ -945,13 +1017,39 @@ static void mdss_dsi_panel_switch_mode(struct mdss_panel_data *pdata,
 			(!pdata->panel_info.send_pps_before_switch))
 		mdss_dsi_panel_dsc_pps_send(ctrl_pdata, &pdata->panel_info);
 }
+/************************************
+backlight level 0-->55 ==> 0-->55
+backlight level 55-->230 ==> 55-->200
+backlight level 230-->255 ==> 200-->255
+*************************************/
+static u32 backlight_level_remap(struct mdss_dsi_ctrl_pdata *ctrl, u32 level)
+{
+	u32 remap_level = 0;
 
+	if (ctrl->bklt_max == 255){
+		if (level < 55){
+			remap_level = level;
+		} else if ((level >= 55) && (level <= 230)) {
+			remap_level = (level*29 + 330)/35;
+		} else {
+			remap_level = level*11/5 - 306;
+		}
+	} else {
+		remap_level = level;
+	}
+	return remap_level;
+}
 static void mdss_dsi_panel_bl_ctrl(struct mdss_panel_data *pdata,
 							u32 bl_level)
 {
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata = NULL;
 	struct mdss_dsi_ctrl_pdata *sctrl = NULL;
+	static bool first_bl_level = true;
 
+	if (first_bl_level || (bl_level == 0)){
+		printk("---backlight level = %d---\n", bl_level);
+		first_bl_level = (bl_level == 0)? true : false;
+	}
 	if (pdata == NULL) {
 		pr_err("%s: Invalid input data\n", __func__);
 		return;
@@ -960,6 +1058,10 @@ static void mdss_dsi_panel_bl_ctrl(struct mdss_panel_data *pdata,
 	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
 				panel_data);
 
+	if (ctrl_pdata->high_brightness_panel){
+		pr_debug("%s goto backlight level remap\n", __func__);
+		bl_level = backlight_level_remap(ctrl_pdata, bl_level);
+	}
 	/*
 	 * Some backlight controllers specify a minimum duty cycle
 	 * for the backlight brightness. If the brightness is less
@@ -1015,6 +1117,274 @@ static void mdss_dsi_panel_bl_ctrl(struct mdss_panel_data *pdata,
 	}
 }
 
+int mdss_dsi_panel_set_hbm_mode(struct mdss_dsi_ctrl_pdata *ctrl, int level)
+{
+	struct dsi_panel_cmds *hbm_on_cmds,*hbm_off_cmds;
+
+	mutex_lock(&ctrl->panel_mode_lock);
+    if (!ctrl->is_panel_on){
+        mutex_unlock(&ctrl->panel_mode_lock);
+        return 0;
+    }
+	hbm_on_cmds = &ctrl->hbm_on_cmds;
+	hbm_off_cmds = &ctrl->hbm_off_cmds;
+    if (level){
+        if (hbm_on_cmds->cmd_cnt){
+            mdss_dsi_panel_cmds_send(ctrl, hbm_on_cmds, CMD_REQ_COMMIT);
+            pr_err("HBM Mode On.\n");
+        } else{
+            pr_err("This Panel not support HBM Mode On.");
+        }
+    } else{
+        if (hbm_off_cmds->cmd_cnt){
+            mdss_dsi_panel_cmds_send(ctrl, hbm_off_cmds, CMD_REQ_COMMIT);
+            pr_err("HBM Mode Off.\n");
+        } else{
+            pr_err("This Panel not support HBM Mode Off.");
+        }
+    }
+    mutex_unlock(&ctrl->panel_mode_lock);
+	return 0;
+}
+
+int mdss_dsi_panel_get_hbm_mode(struct mdss_dsi_ctrl_pdata *ctrl)
+{
+    return ctrl->hbm_mode;
+}
+
+int mdss_dsi_panel_set_srgb_mode(struct mdss_dsi_ctrl_pdata *ctrl, int level)
+{
+	struct dsi_panel_cmds *srgb_on_cmds;
+	struct dsi_panel_cmds *srgb_off_cmds;
+
+	mutex_lock(&ctrl->panel_mode_lock);
+	if (!ctrl->is_panel_on) {
+		mutex_unlock(&ctrl->panel_mode_lock);
+		return 0;
+	}
+	srgb_on_cmds = &ctrl->srgb_on_cmds;
+	srgb_off_cmds = &ctrl->srgb_off_cmds;
+	if (level) {
+		if (srgb_on_cmds->cmd_cnt) {
+			mdss_dsi_panel_cmds_send(ctrl, srgb_on_cmds,
+				CMD_REQ_COMMIT);
+			pr_err("sRGB Mode On.\n");
+		} else {
+			pr_err("This panel not support sRGB mode on.\n");
+		}
+	} else {
+		if (srgb_off_cmds->cmd_cnt) {
+			mdss_dsi_panel_cmds_send(ctrl,
+				srgb_off_cmds, CMD_REQ_COMMIT);
+			pr_err("sRGB Mode off.\n");
+		} else {
+			pr_err("This panel not support sRGB mode off.\n");
+		}
+	}
+	mutex_unlock(&ctrl->panel_mode_lock);
+	return 0;
+}
+int mdss_dsi_panel_get_srgb_mode(struct mdss_dsi_ctrl_pdata *ctrl)
+{
+	return ctrl->SRGB_mode;
+}
+
+int mdss_dsi_panel_set_adobe_rgb_mode(struct mdss_dsi_ctrl_pdata *ctrl,
+	int level)
+{
+	struct dsi_panel_cmds *adobe_rgb_on_cmds;
+	struct dsi_panel_cmds *adobe_rgb_off_cmds;
+
+	mutex_lock(&ctrl->panel_mode_lock);
+	if (!ctrl->is_panel_on) {
+		mutex_unlock(&ctrl->panel_mode_lock);
+		return 0;
+	}
+	adobe_rgb_on_cmds = &ctrl->Adobe_RGB_on_cmds;
+	adobe_rgb_off_cmds = &ctrl->Adobe_RGB_off_cmds;
+	if (level) {
+		if (adobe_rgb_on_cmds->cmd_cnt) {
+			mdss_dsi_panel_cmds_send(ctrl, adobe_rgb_on_cmds,
+				CMD_REQ_COMMIT);
+			pr_err("Adobe RGB Mode On.\n");
+		} else {
+			pr_err("This Panel not support Adobe RGB mode On.\n");
+		}
+	} else {
+		if (adobe_rgb_off_cmds->cmd_cnt) {
+			mdss_dsi_panel_cmds_send(ctrl, adobe_rgb_off_cmds,
+				CMD_REQ_COMMIT);
+			pr_err("Adobe RGB Mode Off.\n");
+		} else {
+			pr_err("This Panel not support Adobe RGB mode Off.\n");
+		}
+	}
+	mutex_unlock(&ctrl->panel_mode_lock);
+	return 0;
+}
+int mdss_dsi_panel_get_adobe_rgb_mode(struct mdss_dsi_ctrl_pdata *ctrl)
+{
+	return ctrl->Adobe_RGB_mode;
+}
+
+int mdss_dsi_panel_set_dci_p3_mode(struct mdss_dsi_ctrl_pdata *ctrl, int level)
+{
+	struct dsi_panel_cmds *dci_p3_on_cmds;
+	struct dsi_panel_cmds *dci_p3_off_cmds;
+
+	mutex_lock(&ctrl->panel_mode_lock);
+	if (!ctrl->is_panel_on) {
+		mutex_unlock(&ctrl->panel_mode_lock);
+		return 0;
+	 }
+	dci_p3_on_cmds = &ctrl->dci_p3_on_cmds;
+	dci_p3_off_cmds = &ctrl->dci_p3_off_cmds;
+	if (level) {
+		if (dci_p3_on_cmds->cmd_cnt) {
+			mdss_dsi_panel_cmds_send(ctrl, dci_p3_on_cmds,
+				CMD_REQ_COMMIT);
+			pr_err("DCI-P3 Mode On.\n");
+		} else {
+			pr_err("This Panel not support DCI-P3 mode On.\n");
+		}
+	} else {
+		if (dci_p3_off_cmds->cmd_cnt) {
+			mdss_dsi_panel_cmds_send(ctrl, dci_p3_off_cmds,
+				CMD_REQ_COMMIT);
+			pr_err("DCI-P3 Mode Off.\n");
+		} else {
+			pr_err("This Panel not support DCI-P3 mode Off.\n");
+		}
+	}
+	mutex_unlock(&ctrl->panel_mode_lock);
+	return 0;
+}
+
+int mdss_dsi_panel_get_dci_p3_mode(struct mdss_dsi_ctrl_pdata *ctrl)
+{
+	return ctrl->dci_p3_mode;
+}
+
+int mdss_dsi_panel_set_night_mode(struct mdss_dsi_ctrl_pdata *ctrl, int level)
+{
+	struct dsi_panel_cmds *night_mode_on_cmds;
+	struct dsi_panel_cmds *night_mode_off_cmds;
+
+	mutex_lock(&ctrl->panel_mode_lock);
+	if (!ctrl->is_panel_on) {
+		mutex_unlock(&ctrl->panel_mode_lock);
+		return 0;
+	}
+	night_mode_on_cmds = &ctrl->night_mode_on_cmds;
+	/* night mode same as sRGB mode */
+	night_mode_off_cmds = &ctrl->night_mode_off_cmds;
+	/* night mode same as sRGB mode */
+	if (level) {
+		if (night_mode_on_cmds->cmd_cnt) {
+			mdss_dsi_panel_cmds_send(ctrl,
+				night_mode_on_cmds, CMD_REQ_COMMIT);
+			pr_err("Night	Mode On (night mode).\n");
+		} else {
+			pr_err("This panel not support Night mode on (night mode).\n");
+		}
+	} else {
+		if (night_mode_off_cmds->cmd_cnt) {
+			mdss_dsi_panel_cmds_send(ctrl,
+			night_mode_off_cmds, CMD_REQ_COMMIT);
+			pr_err("Night Mode off (night mode).\n");
+		} else {
+			pr_err("This panel not support night mode off (night mode).\n");
+		}
+	}
+	mutex_unlock(&ctrl->panel_mode_lock);
+	return 0;
+}
+int mdss_dsi_panel_get_night_mode(struct mdss_dsi_ctrl_pdata *ctrl)
+{
+	return ctrl->night_mode;
+}
+
+int mdss_dsi_panel_set_oneplus_mode(struct mdss_dsi_ctrl_pdata *ctrl, int level)
+{
+	struct dsi_panel_cmds *oneplus_mode_on_cmds;
+	struct dsi_panel_cmds *oneplus_mode_off_cmds;
+
+	mutex_lock(&ctrl->panel_mode_lock);
+	if (!ctrl->is_panel_on) {
+		mutex_unlock(&ctrl->panel_mode_lock);
+		return 0;
+	}
+	oneplus_mode_on_cmds = &ctrl->oneplus_mode_on_cmds;
+	/* night mode same as sRGB mode */
+	oneplus_mode_off_cmds = &ctrl->oneplus_mode_off_cmds;
+	/* night mode same as sRGB mode */
+
+	if (level) {
+		if (oneplus_mode_on_cmds->cmd_cnt) {
+			mdss_dsi_panel_cmds_send(ctrl, oneplus_mode_on_cmds,
+				CMD_REQ_COMMIT);
+			pr_err("oneplus  Mode On (oneplus mode).\n");
+		} else {
+			pr_err("This panel not support oneplus mode on (oneplus mode).\n");
+		}
+	} else {
+		if (oneplus_mode_off_cmds->cmd_cnt) {
+			mdss_dsi_panel_cmds_send(ctrl, oneplus_mode_off_cmds,
+					CMD_REQ_COMMIT);
+			pr_err("oneplus Mode off (oneplus mode).\n");
+		} else {
+			pr_err("This panel not support oneplus mode off (oneplus mode).\n");
+		}
+	}
+	mutex_unlock(&ctrl->panel_mode_lock);
+
+	return 0;
+}
+int mdss_dsi_panel_get_oneplus_mode(struct mdss_dsi_ctrl_pdata *ctrl)
+{
+	return ctrl->oneplus_mode;
+}
+
+int mdss_dsi_panel_set_adaption_mode(struct mdss_dsi_ctrl_pdata *ctrl,
+	int level)
+{
+	struct dsi_panel_cmds *adaption_mode_on_cmds;
+	struct dsi_panel_cmds *adaption_mode_off_cmds;
+
+	mutex_lock(&ctrl->panel_mode_lock);
+	if (!ctrl->is_panel_on) {
+		mutex_unlock(&ctrl->panel_mode_lock);
+		return 0;
+	}
+	adaption_mode_on_cmds = &ctrl->adaption_mode_on_cmds;
+	/* night mode same as sRGB mode */
+	adaption_mode_off_cmds = &ctrl->adaption_mode_off_cmds;
+	/* night mode same as sRGB mode */
+	if (level) {
+		if (adaption_mode_on_cmds->cmd_cnt) {
+			mdss_dsi_panel_cmds_send(ctrl, adaption_mode_on_cmds,
+				CMD_REQ_COMMIT);
+			pr_err("Adaption Mode On (adaption mode).\n");
+		} else {
+			pr_err("This panel not support Adaption mode on (adaption mode).\n");
+		}
+	} else {
+		if (adaption_mode_off_cmds->cmd_cnt) {
+			mdss_dsi_panel_cmds_send(ctrl, adaption_mode_off_cmds,
+				CMD_REQ_COMMIT);
+			pr_err("Adaption  Mode off (adaption mode).\n");
+		} else {
+			pr_err("This panel not support adaption mode off (adaption mode).\n");
+		}
+	}
+	mutex_unlock(&ctrl->panel_mode_lock);
+	return 0;
+}
+int mdss_dsi_panel_get_adaption_mode(struct mdss_dsi_ctrl_pdata *ctrl)
+{
+	return ctrl->adaption_mode;
+}
+
 static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 {
 	struct mdss_dsi_ctrl_pdata *ctrl = NULL;
@@ -1026,12 +1396,12 @@ static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 		pr_err("%s: Invalid input data\n", __func__);
 		return -EINVAL;
 	}
-
+	pr_err("%s start\n", __func__);
 	pinfo = &pdata->panel_info;
 	ctrl = container_of(pdata, struct mdss_dsi_ctrl_pdata,
 				panel_data);
 
-	pr_debug("%s: ndx=%d\n", __func__, ctrl->ndx);
+	pr_err("%s: ndx=%d\n", __func__, ctrl->ndx);
 
 	if (pinfo->dcs_cmd_by_left) {
 		if (ctrl->ndx != DSI_CTRL_LEFT)
@@ -1046,9 +1416,22 @@ static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 
 	pr_debug("%s: ndx=%d cmd_cnt=%d\n", __func__,
 				ctrl->ndx, on_cmds->cmd_cnt);
-
+	mutex_lock(&ctrl->panel_mode_lock);
+	ctrl->is_panel_on = true;
+	mutex_unlock(&ctrl->panel_mode_lock);
+#if defined(CONFIG_IRIS2P_FULL_SUPPORT)
+#if !defined(WITHOUT_IRIS)
+	iris_init(ctrl);
+#endif
 	if (on_cmds->cmd_cnt)
 		mdss_dsi_panel_cmds_send(ctrl, on_cmds, CMD_REQ_COMMIT);
+#if !defined(WITHOUT_IRIS)
+	iris_lightup(ctrl);
+#endif
+#else
+	if (on_cmds->cmd_cnt)
+		mdss_dsi_panel_cmds_send(ctrl, on_cmds, CMD_REQ_COMMIT);
+#endif
 
 	if (pinfo->compression_mode == COMPRESSION_DSC)
 		mdss_dsi_panel_dsc_pps_send(ctrl, pinfo);
@@ -1059,13 +1442,43 @@ static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 	/* Ensure low persistence mode is set as before */
 	mdss_dsi_panel_apply_display_setting(pdata, pinfo->persist_mode);
 
-	if (pdata->event_handler)
-		pdata->event_handler(pdata, MDSS_EVENT_UPDATE_LIVEDISPLAY,
-				(void *)(unsigned long) MODE_UPDATE_ALL);
-
 end:
 	pr_debug("%s:-\n", __func__);
-	return ret;
+	pr_err("%s end\n", __func__);
+	if (mdss_dsi_panel_get_srgb_mode(ctrl)) {
+		mdss_dsi_panel_set_srgb_mode(ctrl,
+			mdss_dsi_panel_get_srgb_mode(ctrl));
+	}
+
+	if (mdss_dsi_panel_get_adobe_rgb_mode(ctrl)) {
+		mdss_dsi_panel_set_adobe_rgb_mode(ctrl,
+			mdss_dsi_panel_get_adobe_rgb_mode(ctrl));
+	}
+
+	if (mdss_dsi_panel_get_dci_p3_mode(ctrl)) {
+		mdss_dsi_panel_set_dci_p3_mode(ctrl,
+			mdss_dsi_panel_get_dci_p3_mode(ctrl));
+	}
+
+	if (mdss_dsi_panel_get_night_mode(ctrl)) {
+		mdss_dsi_panel_set_night_mode(ctrl,
+		mdss_dsi_panel_get_night_mode(ctrl));
+	}
+	if (mdss_dsi_panel_get_oneplus_mode(ctrl)) {
+		mdss_dsi_panel_set_oneplus_mode(ctrl,
+			mdss_dsi_panel_get_oneplus_mode(ctrl));
+	}
+
+	if (mdss_dsi_panel_get_adaption_mode(ctrl)) {
+		mdss_dsi_panel_set_adaption_mode(ctrl,
+		   mdss_dsi_panel_get_adaption_mode(ctrl));
+	}
+
+	if (mdss_dsi_panel_get_hbm_mode(ctrl)) {
+		mdss_dsi_panel_set_hbm_mode(ctrl,
+		   mdss_dsi_panel_get_hbm_mode(ctrl));
+	}
+	 return ret;
 }
 
 static int mdss_dsi_post_panel_on(struct mdss_panel_data *pdata)
@@ -1079,7 +1492,7 @@ static int mdss_dsi_post_panel_on(struct mdss_panel_data *pdata)
 		pr_err("%s: Invalid input data\n", __func__);
 		return -EINVAL;
 	}
-
+	pr_err("%s start\n", __func__);
 	ctrl = container_of(pdata, struct mdss_dsi_ctrl_pdata,
 				panel_data);
 
@@ -1104,6 +1517,7 @@ static int mdss_dsi_post_panel_on(struct mdss_panel_data *pdata)
 
 end:
 	pr_debug("%s:-\n", __func__);
+	pr_err("%s end\n", __func__);
 	return 0;
 }
 
@@ -1116,7 +1530,7 @@ static int mdss_dsi_panel_off(struct mdss_panel_data *pdata)
 		pr_err("%s: Invalid input data\n", __func__);
 		return -EINVAL;
 	}
-
+	pr_err("%s start\n", __func__);
 	pinfo = &pdata->panel_info;
 	ctrl = container_of(pdata, struct mdss_dsi_ctrl_pdata,
 				panel_data);
@@ -1127,10 +1541,19 @@ static int mdss_dsi_panel_off(struct mdss_panel_data *pdata)
 		if (ctrl->ndx != DSI_CTRL_LEFT)
 			goto end;
 	}
-
+	mutex_lock(&ctrl->panel_mode_lock);
+	ctrl->is_panel_on = false;
+	mutex_unlock(&ctrl->panel_mode_lock);
+#if defined(CONFIG_IRIS2P_FULL_SUPPORT)
+#if !defined(WITHOUT_IRIS)
+	iris_lightoff(ctrl);
+#endif
 	if (ctrl->off_cmds.cmd_cnt)
 		mdss_dsi_panel_cmds_send(ctrl, &ctrl->off_cmds, CMD_REQ_COMMIT);
-
+#else
+	if (ctrl->off_cmds.cmd_cnt)
+		mdss_dsi_panel_cmds_send(ctrl, &ctrl->off_cmds, CMD_REQ_COMMIT);
+#endif
 	if (ctrl->ds_registered && pinfo->is_pluggable) {
 		mdss_dba_utils_video_off(pinfo->dba_data);
 		mdss_dba_utils_hdcp_enable(pinfo->dba_data, false);
@@ -1138,6 +1561,7 @@ static int mdss_dsi_panel_off(struct mdss_panel_data *pdata)
 
 end:
 	pr_debug("%s:-\n", __func__);
+	pr_err("%s end\n", __func__);
 	return 0;
 }
 
@@ -3062,10 +3486,53 @@ static int mdss_panel_parse_dt(struct device_node *np,
 
 	pinfo->is_dba_panel = of_property_read_bool(np,
 			"qcom,dba-panel");
+#if defined(CONFIG_IRIS2P_FULL_SUPPORT)
+	iris_init_params_parse(np, ctrl_pdata);
+	iris_init_cmd_setup(ctrl_pdata);
+#endif
 
+	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->srgb_on_cmds,
+		"qcom,mdss-dsi-panel-srgb-on-command",
+		"qcom,mdss-dsi-srgb-command-state");
+	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->srgb_off_cmds,
+		"qcom,mdss-dsi-panel-srgb-off-command",
+		"qcom,mdss-dsi-srgb-command-state");
+	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->night_mode_on_cmds,
+		"qcom,mdss-dsi-panel-night-mode-on-command",
+		"qcom,mdss-dsi-night-mode-command-state");
+	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->night_mode_off_cmds,
+		"qcom,mdss-dsi-panel-night-mode-off-command",
+		"qcom,mdss-dsi-night-mode-command-state");
+	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->oneplus_mode_on_cmds,
+		"qcom,mdss-dsi-panel-oneplus-mode-on-command",
+		"qcom,mdss-dsi-oneplus-mode-command-state");
+	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->oneplus_mode_off_cmds,
+		"qcom,mdss-dsi-panel-oneplus-mode-off-command",
+		"qcom,mdss-dsi-oneplus-mode-command-state");
+	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->adaption_mode_on_cmds,
+		"qcom,mdss-dsi-panel-adaption-mode-on-command",
+		"qcom,mdss-dsi-adaption-mode-command-state");
+	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->adaption_mode_off_cmds,
+		"qcom,mdss-dsi-panel-adaption-mode-off-command",
+		"qcom,mdss-dsi-adaption-mode-command-state");
+	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->dci_p3_on_cmds,
+		"qcom,mdss-dsi-panel-dci-p3-on-command",
+		"qcom,mdss-dsi-dci-p3-command-state");
+	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->dci_p3_off_cmds,
+		"qcom,mdss-dsi-panel-dci-p3-off-command",
+		"qcom,mdss-dsi-dci-p3-command-state");
+	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->hbm_on_cmds,
+		"qcom,mdss-dsi-panel-hbm-on-command",
+		"qcom,mdss-dsi-hbm-command-state");
+	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->hbm_off_cmds,
+		"qcom,mdss-dsi-panel-hbm-off-command",
+		"qcom,mdss-dsi-hbm-command-state");
+
+	ctrl_pdata->high_brightness_panel= of_property_read_bool(np,
+					"qcom,mdss-dsi-high-brightness-panel");
+	pr_err("high brightness panel: %d\n", ctrl_pdata->high_brightness_panel);
 	ctrl_pdata->bl_high2bit = of_property_read_bool(np,
 					"qcom,mdss-bl-high2bit");
-
 	if (pinfo->is_dba_panel) {
 		bridge_chip_name = of_get_property(np,
 			"qcom,bridge-name", &len);
@@ -3086,8 +3553,6 @@ static int mdss_panel_parse_dt(struct device_node *np,
 		pinfo->esc_clk_rate_hz = MDSS_DSI_MAX_ESC_CLK_RATE_HZ;
 	pr_debug("%s: esc clk %d\n", __func__, pinfo->esc_clk_rate_hz);
 
-	mdss_livedisplay_parse_dt(np, pinfo);
-
 	return 0;
 
 error:
@@ -3101,6 +3566,10 @@ int mdss_dsi_panel_init(struct device_node *node,
 	int rc = 0;
 	static const char *panel_name;
 	struct mdss_panel_info *pinfo;
+	static const char *panel_manufacture;
+	static const char *panel_version;
+	static const char *backlight_manufacture;
+	static const char *backlight_version;
 
 	if (!node || !ctrl_pdata) {
 		pr_err("%s: Invalid arguments\n", __func__);
@@ -3119,6 +3588,26 @@ int mdss_dsi_panel_init(struct device_node *node,
 		pr_info("%s: Panel Name = %s\n", __func__, panel_name);
 		strlcpy(&pinfo->panel_name[0], panel_name, MDSS_MAX_PANEL_LEN);
 	}
+	panel_manufacture = of_get_property(node,
+		"qcom,mdss-dsi-panel-manufacture", NULL);
+	if (!panel_manufacture)
+		pr_info("%s:%d, panel manufacture not specified\n", __func__, __LINE__);
+	panel_version = of_get_property(node, "qcom,mdss-dsi-panel-version", NULL);
+	if (!panel_version)
+		pr_info("%s:%d, panel version not specified\n", __func__, __LINE__);
+	push_component_info(LCD, (char *)panel_version,
+		(char *)panel_manufacture);
+	backlight_manufacture = of_get_property(node,
+		"qcom,mdss-dsi-backlight-manufacture", NULL);
+	if (!backlight_manufacture)
+		pr_info("%s:%d, backlight manufacture not specified\n", __func__, __LINE__);
+	backlight_version = of_get_property(node,
+		"qcom,mdss-dsi-backlight-version", NULL);
+	if (!backlight_version)
+		pr_info("%s:%d, backlight version not specified\n", __func__, __LINE__);
+	push_component_info(BACKLIGHT, (char *)backlight_version,
+		(char *)backlight_manufacture);
+	mutex_init(&ctrl_pdata->panel_mode_lock);
 	rc = mdss_panel_parse_dt(node, ctrl_pdata);
 	if (rc) {
 		pr_err("%s:%d panel dt parse failed\n", __func__, __LINE__);

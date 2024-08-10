@@ -308,11 +308,24 @@ enum mdss_intf_events {
 	MDSS_EVENT_DEEP_COLOR,
 	MDSS_EVENT_DISABLE_PANEL,
 	MDSS_EVENT_UPDATE_PANEL_PPM,
+	MDSS_EVENT_PANEL_SET_HBM_MODE,
+	MDSS_EVENT_PANEL_GET_HBM_MODE,
+	MDSS_EVENT_PANEL_SET_SRGB_MODE,
+	MDSS_EVENT_PANEL_GET_SRGB_MODE,
+	MDSS_EVENT_PANEL_SET_ADOBE_RGB_MODE,
+	MDSS_EVENT_PANEL_GET_ADOBE_RGB_MODE,
+	MDSS_EVENT_PANEL_SET_DCI_P3_MODE,
+	MDSS_EVENT_PANEL_GET_DCI_P3_MODE,
+	MDSS_EVENT_PANEL_SET_NIGHT_MODE,
+	MDSS_EVENT_PANEL_GET_NIGHT_MODE,
+	MDSS_EVENT_PANEL_SET_ONEPLUS_MODE,
+	MDSS_EVENT_PANEL_GET_ONEPLUS_MODE,
+	MDSS_EVENT_PANEL_SET_ADAPTION_MODE,
+	MDSS_EVENT_PANEL_GET_ADAPTION_MODE,
 	MDSS_EVENT_DSI_TIMING_DB_CTRL,
 	MDSS_EVENT_AVR_MODE,
 	MDSS_EVENT_REGISTER_CLAMP_HANDLER,
 	MDSS_EVENT_DSI_DYNAMIC_BITCLK,
-	MDSS_EVENT_UPDATE_LIVEDISPLAY,
 	MDSS_EVENT_MAX,
 };
 
@@ -765,8 +778,6 @@ struct mdss_dsi_dual_pu_roi {
 	bool enabled;
 };
 
-struct mdss_livedisplay_ctx;
-
 struct mdss_panel_hdr_properties {
 	bool hdr_enabled;
 
@@ -928,8 +939,6 @@ struct mdss_panel_info {
 	 * configuring the event timer wakeup logic.
 	 */
 	u32 adjust_timer_delay_ms;
-
-	struct mdss_livedisplay_ctx *livedisplay;
 
 	/* debugfs structure for the panel */
 	struct mdss_panel_debugfs_info *debugfs_info;
