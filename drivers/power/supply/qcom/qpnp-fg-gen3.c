@@ -3090,7 +3090,7 @@ done:
 		pr_err("Error in reading %04x[%d] rc=%d\n", NOM_CAP_WORD,
 			NOM_CAP_OFFSET, rc);
 	} else {
-		chip->cl.nom_cap_uah = DESIGN_BATTERY_CAPACITY * 1000
+		chip->cl.nom_cap_uah = DESIGN_BATTERY_CAPACITY * 1000;
 		rc = fg_load_learned_cap_from_sram(chip);
 		if (rc < 0)
 			pr_err("Error in loading capacity learning data, rc:%d\n",
@@ -4097,7 +4097,7 @@ static int fg_psy_set_property(struct power_supply *psy,
 		}
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_FULL:
-		if (chip->cl->active) {
+		if (chip->cl.active) {
 			pr_warn("Capacity learning active!\n");
 			return 0;
 		}
