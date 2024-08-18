@@ -1,6 +1,3 @@
-
-
-
 /*
  *
  * Automatically generated file; DO NOT EDIT.
@@ -12,7 +9,6 @@
  * Helper macros to use CONFIG_ options in C/CPP expressions. Note that
  * these only work with boolean and tristate options.
  */
-
 /*
  * Getting something that works in C and CPP for an arg that may or may
  * not be defined is tricky.  Here, if we have "#define CONFIG_BOOGER 1"
@@ -21,35 +17,21 @@
  * When CONFIG_BOOGER is not defined, we generate a (... 1, 0) pair, and when
  * the last step cherry picks the 2nd arg, we get a zero.
  */
-
-
-
-
-
-
-
 /*
  * IS_BUILTIN(CONFIG_FOO) evaluates to 1 if CONFIG_FOO is set to 'y', 0
  * otherwise. For boolean options, this is equivalent to
  * IS_ENABLED(CONFIG_FOO).
  */
-
-
 /*
  * IS_MODULE(CONFIG_FOO) evaluates to 1 if CONFIG_FOO is set to 'm', 0
  * otherwise.
  */
-
-
 /*
  * IS_REACHABLE(CONFIG_FOO) evaluates to 1 if the currently compiled
  * code can call a function defined in code compiled based on CONFIG_FOO.
  * This is similar to IS_ENABLED(), but returns false when invoked from
  * built-in code when CONFIG_FOO is set to 'm'.
  */
-
-
-
 /*
  * IS_ENABLED(CONFIG_FOO) evaluates to 1 if CONFIG_FOO is set to 'y' or 'm',
  * 0 otherwise.
@@ -59,8 +41,6 @@
  * taken from the i386 version by Russell King
  * Written by Martin Mares <mj@atrey.karlin.mff.cuni.cz>
  */
-
-
 /*
  * Helper macros to support writing architecture specific
  * linker scripts.
@@ -112,15 +92,6 @@
  * Examples are: [__initramfs_start, __initramfs_end] for initramfs and
  *               [__nosave_begin, __nosave_end] for the nosave data
  */
-
-
-
-
-
-
-
-
-
 /*
  * Export symbols from the kernel to modules.  Forked from module.h
  * to reduce the amount of pointless cruft we feed to gcc when only
@@ -129,20 +100,14 @@
  * Try not to add #includes here.  It slows compilation and makes kernel
  * hackers place grumpy comments in header files.
  */
-
 /* Some toolchains use a `_' prefix for all user symbols. */
 /* Indirect, so macros are expanded before pasting. */
 
 /* Align . to a 8 byte boundary equals to maximum function alignment. */
-
-
 /*
  * Align to a 32 byte boundary equal to the
  * alignment gcc 4.5 uses for a struct
  */
-
-
-
 /* The actual configuration determine if the init/exit sections
  * are handled as text/data or they can be discarded (which
  * often happens at runtime)
@@ -160,10 +125,6 @@
  * Allow architectures to handle ro_after_init data on their
  * own by defining an empty RO_AFTER_INIT_DATA.
  */
-
-
-
-
 /*
  * Read only Data
  */
@@ -173,22 +134,9 @@
  * during second ld run in second ld pass when generating System.map */
 /* sched.text is aling to function alignment to secure we have same
  * address even at second ld pass when generating System.map */
-
-
-
-
-
-
 /* spinlock.text is aling to function alignment to secure we have same
  * address even at second ld pass when generating System.map */
 /* Section used for early init (in .S files) */
-
-
-
-
-
-
-
 /*
  * Exception table
  */
@@ -200,13 +148,6 @@
  * bss (Block Started by Symbol) - uninitialized data
  * zeroed during startup
  */
-
-
-
-
-
-
-
 /*
  * Allow archectures to redefine BSS_FIRST_SECTIONS to add extra
  * sections to the front of bss.
@@ -276,8 +217,6 @@
  * Definition of the high level *_SECTION macros
  * They will fit only a subset of the architectures
  */
-
-
 /*
  * Writeable data.
  * All sections are combined in a single .data section.
@@ -305,10 +244,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-
-
 /*
  * Copyright (C) 2012 ARM Ltd.
  *
@@ -324,10 +259,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-
-
 /*
  * Copyright (C) 2012 ARM Ltd.
  *
@@ -343,10 +274,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-
-
 /*
  * Memory returned by kmalloc() may be used for DMA, so we must make
  * sure that all such allocations are aligned to the maximum *known*
@@ -371,11 +298,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-
-
-
 /*
  * Copyright (C) 2012 ARM Ltd.
  *
@@ -391,10 +313,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-
-
 /*
  * Copyright (C) 2015  ARM Limited
  * Author: Dave Martin <Dave.Martin@arm.com>
@@ -411,11 +329,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-
-
-
 /*
  * Copyright (C) 2012 ARM Ltd.
  *
@@ -423,10 +336,6 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-
-
-
-
 /*
  * #imm16 values used for BRK instruction generation
  * Allowed values for kgdb are 0x400 - 0x7ff
@@ -435,9 +344,6 @@
  * 0x401: for compile time BRK instruction
  * 0x800: kernel-mode BUG() and WARN() traps
  */
-
-
-
 /*
  * Allow us to mark functions as 'deprecated' and have gcc emit a nice
  * warning for each use, in hopes of speeding the functions removal.
@@ -480,38 +386,16 @@
  * `const'.  It does not make sense for a `const' function to return
  * `void'.
  */
-
-
-
-
 /*
  * Tell gcc if a function is cold. The compiler will assume any path
  * directly leading to the call is unlikely.
  */
-
-
-
-
-
 /* Simple shorthand for a section definition */
 /*
  * Assume alignment of return value.
  */
-
-
-
-
-
 /* Are two types/vars the same type (ignoring qualifiers)? */
-
-
-
-
 /* Is this type a native word size -- useful for atomic operations */
-
-
-
-
 /* Compile time object size, -1 for unknown */
 /*
  * Sparse complains of variable sized arrays due to the temporary variable in
@@ -528,13 +412,6 @@
  * supplied condition is *false*, emitting the supplied error message if the
  * compiler has support to do so.
  */
-
-
-
-
-
-
-
 /*
  * Prevent the compiler from merging or refetching accesses.  The compiler
  * is also forbidden from reordering successive instances of ACCESS_ONCE(),
@@ -555,11 +432,6 @@
  *
  * If possible use READ_ONCE()/WRITE_ONCE() instead.
  */
-
-
-
-
-
 /**
  * lockless_dereference() - safely load a pointer for later dereference
  * @p: The pointer to load
@@ -568,13 +440,6 @@
  * object's lifetime is managed by something other than RCU.  That
  * "something other" might be reference counting or simple immortality.
  */
-
-
-
-
-
-
-
 /* Ignore/forbid kprobes attach on very low level functions marked by this attribute: */
 /*
  * This is needed in functions which generate the stack canary, see
@@ -599,8 +464,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 /*
  * Based on arch/arm/include/asm/memory.h
  *
@@ -621,16 +484,7 @@
  *
  * Note: this file should not be included by non-asm/.h files
  */
-
-
-
-
-
 /* const.h: Macros for dealing with constants.  */
-
-
-
-
 /* Some constant macros are used in both assembler and
  * C code.  Therefore we cannot annotate them always with
  * 'UL' and other type specifiers unilaterally.  We
@@ -639,40 +493,21 @@
  * Similarly, _AT() will cast an expression with a type in C, but
  * leave it unchanged in asm.
  */
-
-
-
-
-
-
-
-
-
 /*
  * int-ll64 is used everywhere now.
  */
-
 /*
  * asm-generic/int-ll64.h
  *
  * Integer declarations for architectures which use "long long"
  * for 64-bit types.
  */
-
-
-
-
 /*
  * asm-generic/int-ll64.h
  *
  * Integer declarations for architectures which use "long long"
  * for 64-bit types.
  */
-
-
-
-
-
 /*
  * Copyright (C) 2012 ARM Ltd.
  *
@@ -688,18 +523,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-
-
-
-
-
-
-
-
-
-
 /*
  * There seems to be no way of detecting this automatically from user
  * space, so 64 bit architectures should override this in their
@@ -707,21 +530,12 @@
  * both 32 and 64 bit user space must not rely on CONFIG_64BIT
  * to decide it, but rather check a compiler provided macro.
  */
-
-
-
-
-
-
-
-
 /*
  * FIXME: The check currently breaks x86-64 build, so it's
  * temporarily disabled. Please fix x86-64 and reenable
  */
 
 /* This is a placeholder, to be removed over time */
-
 /*
  * include/linux/sizes.h
  *
@@ -734,14 +548,10 @@
  * Allow for constants defined here to be used from assembly code
  * by prepending the UL suffix only with actual C code compilation.
  */
-
-
 /*
  * Size of the PCI I/O space. This must remain a power of two so that
  * IO_SPACE_LIMIT acts as a mask for the low bits of I/O addresses.
  */
-
-
 /*
  * PAGE_OFFSET - the virtual address of the start of the kernel image (top
  *		 (VA_BITS - 1))
@@ -754,12 +564,6 @@
  * The size of the KASAN shadow region. This should be 1/8th of the
  * size of the entire kernel virtual address space.
  */
-
-
-
-
-
-
 /*
  * Physical vs virtual RAM address space conversion.  These are
  * private definitions which should NOT be used outside memory.h
@@ -768,25 +572,12 @@
 /*
  * Convert a page to/from a physical address
  */
-
-
-
 /*
  * Memory types available.
  */
-
-
-
-
-
-
-
 /*
  * Memory types for Stage-2 translation
  */
-
-
-
 /*
  * Copyright (C) 2012 ARM Ltd.
  *
@@ -802,9 +593,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-
 /*
  * Number of page-table levels required to address 'va_bits' wide
  * address, without section mapping. We resolve the top (va_bits - PAGE_SHIFT)
@@ -821,8 +609,6 @@
  *
  * which gets simplified as :
  */
-
-
 /*
  * Size mapped by an entry at level n ( 0 <= n <= 3)
  * We map (PAGE_SHIFT - 3) at all translation levels and PAGE_SHIFT bits
@@ -836,116 +622,55 @@
  * Rearranging it a bit we get :
  *   (4 - n) * (PAGE_SHIFT - 3) + 3
  */
-
-
-
-
 /*
  * PMD_SHIFT determines the size a level 2 page table entry can map.
  */
-
-
-
-
-
-
-
 /*
  * PUD_SHIFT determines the size a level 1 page table entry can map.
  */
-
-
-
-
-
-
-
 /*
  * PGDIR_SHIFT determines the size a top-level page table entry can map
  * (depending on the configuration, this level can be 0, 1 or 2).
  */
-
-
-
-
-
 /*
  * Section address mask and size definitions.
  */
-
-
-
-
 /*
  * Contiguous page definitions.
  */
 /* the the numerical offset of the PTE within a range of CONT_PTES */
-
-
 /*
  * Hardware page table definitions.
  *
  * Level 1 descriptor (PUD).
  */
-
-
-
-
-
 /*
  * Level 2 descriptor (PMD).
  */
-
-
-
-
-
-
 /*
  * Section
  */
 /*
  * AttrIndx[2:0] encoding (mapping attributes defined in the MAIR* registers).
  */
-
-
-
 /*
  * Level 3 descriptor (PTE).
  */
 /*
  * AttrIndx[2:0] encoding (mapping attributes defined in the MAIR* registers).
  */
-
-
-
 /*
  * 2nd stage PTE definitions
  */
-
-
-
-
-
-
 /*
  * Memory Attribute override for Stage-2 (MemAttr[3:0])
  */
-
-
-
 /*
  * EL2/HYP PTE/PMD definitions
  */
-
-
-
 /*
  * Highest possible physical address supported.
  */
-
-
-
 /*
  * TCR flags.
  */
@@ -953,12 +678,6 @@
 /*
  * Software defined PTE bits definition.
  */
-
-
-
-
-
-
 /*
  * VMALLOC and SPARSEMEM_VMEMMAP ranges.
  *
@@ -990,12 +709,6 @@
  * with 4K (section size = 2M) but not with 16K (section size = 32M) or
  * 64K (section size = 512M).
  */
-
-
-
-
-
-
 /*
  * The idmap and swapper page tables need some space reserved in the kernel
  * image. Both require pgd, pud (4 levels only) and pmd tables to (section)
@@ -1008,8 +721,6 @@
  */
 /* Initial memory map size */
 /* The size of the initial kernel direct mapping */
-
-
 /*
  * Initial memory map attributes.
  */
@@ -1074,16 +785,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-
-
-
 /* PAGE_SHIFT determines the page size */
 /* CONT_SHIFT determines the number of pages which can be tracked together  */
-
-
-
 /*
  * Linker script macros to generate Image header fields.
  *
@@ -1101,13 +804,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-
-
-
-
-
 /*
  * There aren't any ELF relocations we can use to endian-swap values known only
  * at link time (e.g. the subtraction of two symbol addresses), so we must get
@@ -1126,12 +822,8 @@
  */
 
 /* .exit.text needed in case of alternative patching */
-
-
-
 OUTPUT_ARCH(aarch64)
 ENTRY(_text)
-
 jiffies = jiffies_64;
 /*
  * The size of the PE/COFF section that covers the kernel image, which
@@ -1155,8 +847,6 @@ SECTIONS
 	 * order of matching.
 	 */
  /DISCARD/ : {
-
-
   KEEP(*(.exitcall.exit))
   *(.discard)
   *(.discard.*)
@@ -1164,9 +854,7 @@ SECTIONS
   *(.dynsym .dynstr .hash .gnu.hash)
   *(.eh_frame)
  }
-
  . = ((((0xffffffffffffffff - (1 << (39)) + 1) + (0)) + (0x08000000))) + 0x00080000;
-
  .head.text : {
   _text = .;
   KEEP(*(.head.text))
@@ -1185,29 +873,23 @@ SECTIONS
    . = ALIGN(8); __kprobes_text_start = .; *(.kprobes.text) __kprobes_text_end = .;
    . = ALIGN(0x00001000); __hyp_idmap_text_start = .; *(.hyp.idmap.text) __hyp_idmap_text_end = .; __hyp_text_start = .; *(.hyp.text) __hyp_text_end = .;
    . = ALIGN(0x00001000); __idmap_text_start = .; *(.idmap.text) __idmap_text_end = .;
-
    . = ALIGN((1 << 12)); __entry_tramp_text_start = .; KEEP(*(.entry.tramp.text)) . = ALIGN((1 << 12)); __entry_tramp_text_end = .;
    *(.fixup)
    *(.gnu.warning)
   . = ALIGN(16);
   *(.got) /* Global offset table		*/
  }
-
  . = ALIGN(0x00200000);
  _etext = .; /* End of text section */
-
  . = ALIGN(((1 << 12))); .rodata : AT(ADDR(.rodata) - 0) { __start_rodata = .; *(.rodata) *(.rodata.*) *(.data..ro_after_init) *(__vermagic) . = ALIGN(8); __start___tracepoints_ptrs = .; *(__tracepoints_ptrs) __stop___tracepoints_ptrs = .; *(__tracepoints_strings) } .rodata1 : AT(ADDR(.rodata1) - 0) { *(.rodata1) } . = ALIGN(8); __bug_table : AT(ADDR(__bug_table) - 0) { __start___bug_table = .; KEEP(*(__bug_table)) __stop___bug_table = .; } .pci_fixup : AT(ADDR(.pci_fixup) - 0) { __start_pci_fixups_early = .; KEEP(*(.pci_fixup_early)) __end_pci_fixups_early = .; __start_pci_fixups_header = .; KEEP(*(.pci_fixup_header)) __end_pci_fixups_header = .; __start_pci_fixups_final = .; KEEP(*(.pci_fixup_final)) __end_pci_fixups_final = .; __start_pci_fixups_enable = .; KEEP(*(.pci_fixup_enable)) __end_pci_fixups_enable = .; __start_pci_fixups_resume = .; KEEP(*(.pci_fixup_resume)) __end_pci_fixups_resume = .; __start_pci_fixups_resume_early = .; KEEP(*(.pci_fixup_resume_early)) __end_pci_fixups_resume_early = .; __start_pci_fixups_suspend = .; KEEP(*(.pci_fixup_suspend)) __end_pci_fixups_suspend = .; __start_pci_fixups_suspend_late = .; KEEP(*(.pci_fixup_suspend_late)) __end_pci_fixups_suspend_late = .; } .builtin_fw : AT(ADDR(.builtin_fw) - 0) { __start_builtin_fw = .; *(.builtin_fw) __end_builtin_fw = .; } __ksymtab : AT(ADDR(__ksymtab) - 0) { __start___ksymtab = .; KEEP(*(SORT(___ksymtab+*))) __stop___ksymtab = .; } __ksymtab_gpl : AT(ADDR(__ksymtab_gpl) - 0) { __start___ksymtab_gpl = .; KEEP(*(SORT(___ksymtab_gpl+*))) __stop___ksymtab_gpl = .; } __ksymtab_unused : AT(ADDR(__ksymtab_unused) - 0) { __start___ksymtab_unused = .; KEEP(*(SORT(___ksymtab_unused+*))) __stop___ksymtab_unused = .; } __ksymtab_unused_gpl : AT(ADDR(__ksymtab_unused_gpl) - 0) { __start___ksymtab_unused_gpl = .; KEEP(*(SORT(___ksymtab_unused_gpl+*))) __stop___ksymtab_unused_gpl = .; } __ksymtab_gpl_future : AT(ADDR(__ksymtab_gpl_future) - 0) { __start___ksymtab_gpl_future = .; KEEP(*(SORT(___ksymtab_gpl_future+*))) __stop___ksymtab_gpl_future = .; } __kcrctab : AT(ADDR(__kcrctab) - 0) { __start___kcrctab = .; KEEP(*(SORT(___kcrctab+*))) __stop___kcrctab = .; } __kcrctab_gpl : AT(ADDR(__kcrctab_gpl) - 0) { __start___kcrctab_gpl = .; KEEP(*(SORT(___kcrctab_gpl+*))) __stop___kcrctab_gpl = .; } __kcrctab_unused : AT(ADDR(__kcrctab_unused) - 0) { __start___kcrctab_unused = .; KEEP(*(SORT(___kcrctab_unused+*))) __stop___kcrctab_unused = .; } __kcrctab_unused_gpl : AT(ADDR(__kcrctab_unused_gpl) - 0) { __start___kcrctab_unused_gpl = .; KEEP(*(SORT(___kcrctab_unused_gpl+*))) __stop___kcrctab_unused_gpl = .; } __kcrctab_gpl_future : AT(ADDR(__kcrctab_gpl_future) - 0) { __start___kcrctab_gpl_future = .; KEEP(*(SORT(___kcrctab_gpl_future+*))) __stop___kcrctab_gpl_future = .; } __ksymtab_strings : AT(ADDR(__ksymtab_strings) - 0) { KEEP(*(__ksymtab_strings)) } __init_rodata : AT(ADDR(__init_rodata) - 0) { *(.ref.rodata) } __param : AT(ADDR(__param) - 0) { __start___param = .; KEEP(*(__param)) __stop___param = .; } __modver : AT(ADDR(__modver) - 0) { __start___modver = .; *(__modver) __stop___modver = .; . = ALIGN(((1 << 12))); __end_rodata = .; } . = ALIGN(((1 << 12))); /* everything from this point to     */
  . = ALIGN(8); __ex_table : AT(ADDR(__ex_table) - 0) { __start___ex_table = .; KEEP(*(__ex_table)) __stop___ex_table = .; } /* __init_begin will be marked RO NX */
  .notes : AT(ADDR(.notes) - 0) { __start_notes = .; *(.note.*) __stop_notes = .; }
-
  . = ALIGN(0x00200000);
  __init_begin = .;
-
  . = ALIGN(8); .init.text : AT(ADDR(.init.text) - 0) { _sinittext = .; *(.init.text .init.text.*) *(.text.startup) *(.meminit.text) _einittext = .; }
  .exit.text : {
   *(.exit.text) *(.text.exit) *(.memexit.text)
  }
-
  .init.data : {
   KEEP(*(SORT(___kentry+*))) *(.init.data) *(.meminit.data) *(.init.rodata .init.rodata.*) . = ALIGN(8); __start_ftrace_events = .; KEEP(*(_ftrace_events)) __stop_ftrace_events = .; __start_ftrace_enum_maps = .; KEEP(*(_ftrace_enum_map)) __stop_ftrace_enum_maps = .; *(.meminit.rodata) . = ALIGN(8); __reservedmem_of_table = .; KEEP(*(__reservedmem_of_table)) KEEP(*(__reservedmem_of_table_end)) . = ALIGN(8); __clksrc_of_table = .; KEEP(*(__clksrc_of_table)) KEEP(*(__clksrc_of_table_end)) . = ALIGN(8); __iommu_of_table = .; KEEP(*(__iommu_of_table)) KEEP(*(__iommu_of_table_end)) . = ALIGN(8); __cpu_method_of_table = .; KEEP(*(__cpu_method_of_table)) KEEP(*(__cpu_method_of_table_end)) . = ALIGN(8); __cpuidle_method_of_table = .; KEEP(*(__cpuidle_method_of_table)) KEEP(*(__cpuidle_method_of_table_end)) . = ALIGN(32); __dtb_start = .; *(.dtb.init.rodata) __dtb_end = .; . = ALIGN(8); __irqchip_of_table = .; KEEP(*(__irqchip_of_table)) KEEP(*(__irqchip_of_table_end)) . = ALIGN(8); __irqchip_acpi_probe_table = .; *(__irqchip_acpi_probe_table) __irqchip_acpi_probe_table_end = .; . = ALIGN(8); __clksrc_acpi_probe_table = .; *(__clksrc_acpi_probe_table) __clksrc_acpi_probe_table_end = .;
   . = ALIGN(16); __setup_start = .; KEEP(*(.init.setup)) __setup_end = .;
@@ -1219,9 +901,7 @@ SECTIONS
  .exit.data : {
   *(.exit.data) *(.fini_array) *(.dtors) *(.memexit.data) *(.memexit.rodata)
  }
-
  . = ALIGN((1 << 12)); .data..percpu : AT(ADDR(.data..percpu) - 0) { __per_cpu_load = .; __per_cpu_start = .; __per_cpu_user_mapped_start = .; *(.data..percpu..first) . = ALIGN((1 << 6)); *(.data..percpu..user_mapped) *(.data..percpu..user_mapped..shared_aligned) . = ALIGN((1 << 12)); *(.data..percpu..user_mapped..page_aligned) __per_cpu_user_mapped_end = .; . = ALIGN((1 << 12)); *(.data..percpu..page_aligned) . = ALIGN((1 << 6)); *(.data..percpu..read_mostly) . = ALIGN((1 << 6)); *(.data..percpu) *(.data..percpu..shared_aligned) __per_cpu_end = .; }
-
  . = ALIGN(4);
  .altinstructions : {
   __alt_instructions = .;
@@ -1234,17 +914,13 @@ SECTIONS
  .rela.dyn : ALIGN(8) {
   *(.rela .rela*)
  }
-
  __rela_offset = ABSOLUTE(ADDR(.rela.dyn) - ((((0xffffffffffffffff - (1 << (39)) + 1) + (0)) + (0x08000000))));
  __rela_size = SIZEOF(.rela.dyn);
-
  . = ALIGN(0x00200000);
  __init_end = .;
-
  _data = .;
  _sdata = .;
  . = ALIGN((1 << 12)); .data : AT(ADDR(.data) - 0) { . = ALIGN(16384); *(.data..init_task) . = ALIGN((1 << 12)); __nosave_begin = .; *(.data..nosave) . = ALIGN((1 << 12)); __nosave_end = .; . = ALIGN((1 << 12)); *(.data..page_aligned) . = ALIGN((1 << 6)); *(.data..cacheline_aligned) . = ALIGN((1 << 6)); *(.data..read_mostly) . = ALIGN((1 << 6)); *(.data .data.[0-9a-zA-Z_]*) *(.ref.data) *(.data..shared_aligned) *(.data.unlikely) . = ALIGN(32); *(__tracepoints) . = ALIGN(8); __start___jump_table = .; *(__jump_table) __stop___jump_table = .; . = ALIGN(8); __start___verbose = .; *(__verbose) __stop___verbose = .; __start___trace_bprintk_fmt = .; *(__trace_printk_fmt) __stop___trace_bprintk_fmt = .; __start___tracepoint_str = .; *(__tracepoint_str) __stop___tracepoint_str = .; CONSTRUCTORS }
-
  /*
 	 * Data written with the MMU off but read with the MMU on requires
 	 * cache lines to be invalidated, discarding up to a Cache Writeback
@@ -1262,35 +938,21 @@ SECTIONS
   *(.mmuoff.data.read)
   __mmuoff_data_end = .;
  }
-
-
  _edata = .;
-
  . = ALIGN(0); __bss_start = .; . = ALIGN(0); .sbss : AT(ADDR(.sbss) - 0) { *(.sbss) *(.scommon) } . = ALIGN(0); .bss : AT(ADDR(.bss) - 0) { *(.bss..page_aligned) *(.dynbss) *(.bss .bss.[0-9a-zA-Z_]*) *(COMMON) } . = ALIGN(0); __bss_stop = .;
-
  . = ALIGN((1 << 12));
  idmap_pg_dir = .;
  . += ((((((48)) - 4) / (12 - 3)) - 1) * (1 << 12));
  swapper_pg_dir = .;
  . += ((3 - 1) * (1 << 12));
-
-
  reserved_ttbr0 = .;
  . += ((1 << 12));
-
-
-
  tramp_pg_dir = .;
  . += (1 << 12);
-
-
  _end = .;
-
  .stab 0 : { *(.stab) } .stabstr 0 : { *(.stabstr) } .stab.excl 0 : { *(.stab.excl) } .stab.exclstr 0 : { *(.stab.exclstr) } .stab.index 0 : { *(.stab.index) } .stab.indexstr 0 : { *(.stab.indexstr) } .comment 0 : { *(.comment) }
-
  _kernel_size_le_lo32 = (((_end - _text) & 0xffffffff) & 0xffffffff); _kernel_size_le_hi32 = (((_end - _text) >> 32) & 0xffffffff); _kernel_offset_le_lo32 = (((0x00080000) & 0xffffffff) & 0xffffffff); _kernel_offset_le_hi32 = (((0x00080000) >> 32) & 0xffffffff); _kernel_flags_le_lo32 = (((((0 << 0) | (((12 - 10) / 2) << 1) | (1 << 3))) & 0xffffffff) & 0xffffffff); _kernel_flags_le_hi32 = (((((0 << 0) | (((12 - 10) / 2) << 1) | (1 << 3))) >> 32) & 0xffffffff);
 }
-
 /*
  * The HYP init code and ID map text can't be longer than a page each,
  * and should not cross a page boundary.
@@ -1299,15 +961,8 @@ ASSERT(__hyp_idmap_text_end - (__hyp_idmap_text_start & ~(0x00001000 - 1)) <= 0x
  "HYP init code too big or misaligned")
 ASSERT(__idmap_text_end - (__idmap_text_start & ~(0x00001000 - 1)) <= 0x00001000,
  "ID map text too big or misaligned")
-
-
-
-
-
-
 ASSERT((__entry_tramp_text_end - __entry_tramp_text_start) == (1 << 12),
  "Entry trampoline text too big")
-
 /*
  * If padding is applied before .head.text, virt<->phys conversions will fail.
  */

@@ -121,6 +121,7 @@
 #define LAST_MONOTONIC_SOC_OFFSET	2
 #define ALG_FLAGS_WORD			120
 #define ALG_FLAGS_OFFSET		1
+#define DESIGN_BATTERY_CAPACITY 3300
 
 /* v2 SRAM address and offset in ascending order */
 #define KI_COEFF_LOW_DISCHG_v2_WORD	9
@@ -3089,7 +3090,7 @@ done:
 		pr_err("Error in reading %04x[%d] rc=%d\n", NOM_CAP_WORD,
 			NOM_CAP_OFFSET, rc);
 	} else {
-		chip->cl.nom_cap_uah = (int)(buf[0] | buf[1] << 8) * 1000;
+		chip->cl.nom_cap_uah = DESIGN_BATTERY_CAPACITY * 1000
 		rc = fg_load_learned_cap_from_sram(chip);
 		if (rc < 0)
 			pr_err("Error in loading capacity learning data, rc:%d\n",
@@ -4096,7 +4097,6 @@ static int fg_psy_set_property(struct power_supply *psy,
 		}
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_FULL:
-/*
 		if (chip->cl->active) {
 			pr_warn("Capacity learning active!\n");
 			return 0;
@@ -4105,7 +4105,6 @@ static int fg_psy_set_property(struct power_supply *psy,
 			pr_err("charge_full is out of bounds\n");
 			return -EINVAL;
 		}
-*/
 		chip->cl.learned_cc_uah = pval->intval;
 		rc = fg_save_learned_cap_to_sram(chip);
 		if (rc < 0)
