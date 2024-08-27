@@ -75,6 +75,11 @@ include/config
 include/generated
 arch/*/include/generated
 
+#
+# Generated out files
+#
+/out
+
 # stgit generated dirs
 patches-*
 
