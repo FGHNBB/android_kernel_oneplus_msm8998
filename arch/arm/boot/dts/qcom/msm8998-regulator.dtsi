@@ -57,6 +57,7 @@
 		pm8998_s2: regulator-s2 {
 			regulator-min-microvolt = <1128000>;
 			regulator-max-microvolt = <1128000>;
+			qcom,init-voltage = <1128000>;
 			status = "okay";
 		};
 	};
@@ -66,6 +67,7 @@
 		pm8998_s3: regulator-s3 {
 			regulator-min-microvolt = <1352000>;
 			regulator-max-microvolt = <1352000>;
+			qcom,init-voltage = <1352000>;
 			status = "okay";
 		};
 	};
@@ -75,6 +77,7 @@
 		pm8998_s4: regulator-s4 {
 			regulator-min-microvolt = <1800000>;
 			regulator-max-microvolt = <1800000>;
+			qcom,init-voltage = <1800000>;
 			status = "okay";
 		};
 	};
@@ -84,7 +87,8 @@
 		pm8998_s5: regulator-s5 {
 			regulator-min-microvolt = <1904000>;
 			regulator-max-microvolt = <2040000>;
-			qcom,init-pin-ctrl-mode = <8>;		/* PMIC_AWAKE */
+			qcom,init-voltage = <1904000>;
+			qcom,init-pin-ctrl-mode = <16>;		/* PMIC_AWAKE */
 			qcom,send-defaults;
 			status = "okay";
 		};
@@ -95,7 +99,8 @@
 		pm8998_s7: regulator-s7 {
 			regulator-min-microvolt = <900000>;
 			regulator-max-microvolt = <1028000>;
-			qcom,init-pin-ctrl-mode = <8>;		/* PMIC_AWAKE */
+			qcom,init-voltage = <900000>;
+			qcom,init-pin-ctrl-mode = <16>;		/* PMIC_AWAKE */
 			qcom,send-defaults;
 			status = "okay";
 		};
@@ -106,6 +111,7 @@
 		pm8998_s8: regulator-s8 {
 			regulator-min-microvolt = <800000>;
 			regulator-max-microvolt = <800000>;
+			qcom,init-voltage = <800000>;
 			status = "okay";
 		};
 	};
@@ -153,6 +159,8 @@
 		pm8998_l1: regulator-l1 {
 			regulator-min-microvolt = <880000>;
 			regulator-max-microvolt = <880000>;
+			qcom,init-voltage = <880000>;
+			qcom,init-ldo-mode = <0>;
 			proxy-supply = <&pm8998_l1>;
 			qcom,proxy-consumer-enable;
 			qcom,proxy-consumer-current = <73400>;
@@ -165,6 +173,8 @@
 		pm8998_l2: regulator-l2 {
 			regulator-min-microvolt = <1200000>;
 			regulator-max-microvolt = <1200000>;
+			qcom,init-voltage = <1200000>;
+			qcom,init-ldo-mode = <0>;
 			proxy-supply = <&pm8998_l2>;
 			qcom,proxy-consumer-enable;
 			qcom,proxy-consumer-current = <12560>;
@@ -177,6 +187,8 @@
 		pm8998_l3: regulator-l3 {
 			regulator-min-microvolt = <1000000>;
 			regulator-max-microvolt = <1000000>;
+			qcom,init-voltage = <1000000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -213,6 +225,8 @@
 		pm8998_l5: regulator-l5 {
 			regulator-min-microvolt = <800000>;
 			regulator-max-microvolt = <800000>;
+			qcom,init-voltage = <800000>;
+			qcom,init-ldo-mode = <0>;
 			/* Force NPM follows HW0_EN */
 			qcom,init-pin-ctrl-mode = <1>;
 			status = "okay";
@@ -224,6 +238,8 @@
 		pm8998_l6: regulator-l6 {
 			regulator-min-microvolt = <1808000>;
 			regulator-max-microvolt = <1808000>;
+			qcom,init-voltage = <1808000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -233,6 +249,8 @@
 		pm8998_l7: regulator-l7 {
 			regulator-min-microvolt = <1800000>;
 			regulator-max-microvolt = <1800000>;
+			qcom,init-voltage = <1800000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 
@@ -242,6 +260,8 @@
 			qcom,set = <3>;
 			regulator-min-microvolt = <1800000>;
 			regulator-max-microvolt = <1800000>;
+			qcom,init-voltage = <1800000>;
+			qcom,init-ldo-mode = <0>;
 			/* Force NPM follows HW_EN2 */
 			qcom,init-pin-ctrl-mode = <4>;
 			/* Enable follows HW_EN2 */
@@ -254,6 +274,8 @@
 		pm8998_l8: regulator-l8 {
 			regulator-min-microvolt = <1200000>;
 			regulator-max-microvolt = <1200000>;
+			qcom,init-voltage = <1200000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -263,6 +285,8 @@
 		pm8998_l9: regulator-l9 {
 			regulator-min-microvolt = <1808000>;
 			regulator-max-microvolt = <2960000>;
+			qcom,init-voltage = <1808000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -272,6 +296,8 @@
 		pm8998_l10: regulator-l10 {
 			regulator-min-microvolt = <1808000>;
 			regulator-max-microvolt = <2960000>;
+			qcom,init-voltage = <1808000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -281,6 +307,8 @@
 		pm8998_l11: regulator-l11 {
 			regulator-min-microvolt = <1000000>;
 			regulator-max-microvolt = <1000000>;
+			qcom,init-voltage = <1000000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -290,6 +318,8 @@
 		pm8998_l12: regulator-l12 {
 			regulator-min-microvolt = <1800000>;
 			regulator-max-microvolt = <1800000>;
+			qcom,init-voltage = <1800000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -299,6 +329,8 @@
 		pm8998_l13: regulator-l13 {
 			regulator-min-microvolt = <1808000>;
 			regulator-max-microvolt = <2960000>;
+			qcom,init-voltage = <1808000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -308,6 +340,8 @@
 		pm8998_l14: regulator-l14 {
 			regulator-min-microvolt = <1880000>;
 			regulator-max-microvolt = <1880000>;
+			qcom,init-voltage = <1880000>;
+			qcom,init-ldo-mode = <0>;
 			proxy-supply = <&pm8998_l14>;
 			qcom,proxy-consumer-enable;
 			qcom,proxy-consumer-current = <32000>;
@@ -320,6 +354,8 @@
 		pm8998_l15: regulator-l15 {
 			regulator-min-microvolt = <1800000>;
 			regulator-max-microvolt = <1800000>;
+			qcom,init-voltage = <1800000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -329,6 +365,8 @@
 		pm8998_l16: regulator-l16 {
 			regulator-min-microvolt = <2704000>;
 			regulator-max-microvolt = <2704000>;
+			qcom,init-voltage = <2704000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -338,6 +376,8 @@
 		pm8998_l17: regulator-l17 {
 			regulator-min-microvolt = <1304000>;
 			regulator-max-microvolt = <1304000>;
+			qcom,init-voltage = <1304000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 
@@ -347,6 +387,8 @@
 			qcom,set = <3>;
 			regulator-min-microvolt = <1304000>;
 			regulator-max-microvolt = <1304000>;
+			qcom,init-voltage = <1304000>;
+			qcom,init-ldo-mode = <0>;
 			/* Force NPM follows HW_EN2 */
 			qcom,init-pin-ctrl-mode = <4>;
 			/* Enable follows HW_EN2 */
@@ -359,6 +401,8 @@
 		pm8998_l18: regulator-l18 {
 			regulator-min-microvolt = <2704000>;
 			regulator-max-microvolt = <2704000>;
+			qcom,init-voltage = <2704000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -368,6 +412,8 @@
 		pm8998_l19: regulator-l19 {
 			regulator-min-microvolt = <3008000>;
 			regulator-max-microvolt = <3008000>;
+			qcom,init-voltage = <3008000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -377,6 +423,8 @@
 		pm8998_l20: regulator-l20 {
 			regulator-min-microvolt = <2960000>;
 			regulator-max-microvolt = <2960000>;
+			qcom,init-voltage = <2960000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -386,6 +434,8 @@
 		pm8998_l21: regulator-l21 {
 			regulator-min-microvolt = <2960000>;
 			regulator-max-microvolt = <2960000>;
+			qcom,init-voltage = <2960000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -395,6 +445,8 @@
 		pm8998_l22: regulator-l22 {
 			regulator-min-microvolt = <2864000>;
 			regulator-max-microvolt = <2864000>;
+			qcom,init-voltage = <2864000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -404,6 +456,8 @@
 		pm8998_l23: regulator-l23 {
 			regulator-min-microvolt = <3312000>;
 			regulator-max-microvolt = <3312000>;
+			qcom,init-voltage = <3312000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -413,6 +467,8 @@
 		pm8998_l24: regulator-l24 {
 			regulator-min-microvolt = <1848000>;
 			regulator-max-microvolt = <3088000>;
+			qcom,init-voltage = <1848000>;
+			qcom,init-ldo-mode = <0>;
 			parent-supply = <&pm8998_l12>;
 			status = "okay";
 		};
@@ -422,6 +478,8 @@
 		pm8998_l25: regulator-l25 {
 			regulator-min-microvolt = <3104000>;
 			regulator-max-microvolt = <3312000>;
+			qcom,init-voltage = <3104000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 
@@ -431,6 +489,8 @@
 			qcom,set = <3>;
 			regulator-min-microvolt = <3104000>;
 			regulator-max-microvolt = <3312000>;
+			qcom,init-voltage = <3104000>;
+			qcom,init-ldo-mode = <0>;
 			/* Force NPM follows HW_EN2 */
 			qcom,init-pin-ctrl-mode = <4>;
 			/* Enable follows HW_EN2 */
@@ -443,6 +503,9 @@
 		pm8998_l26: regulator-l26 {
 			regulator-min-microvolt = <1200000>;
 			regulator-max-microvolt = <1200000>;
+			qcom,init-voltage = <1200000>;
+			qcom,init-ldo-mode = <0>;
+			regulator-always-on;
 			status = "okay";
 		};
 	};
@@ -479,6 +542,8 @@
 		pm8998_l28: regulator-l28 {
 			regulator-min-microvolt = <3008000>;
 			regulator-max-microvolt = <3008000>;
+			qcom,init-voltage = <3008000>;
+			qcom,init-ldo-mode = <0>;
 			status = "okay";
 		};
 	};
@@ -502,6 +567,7 @@
 		pmi8998_bob: regulator-bob {
 			regulator-min-microvolt = <3312000>;
 			regulator-max-microvolt = <3600000>;
+			qcom,init-voltage = <3312000>;
 			qcom,pwm-threshold-current = <2000000>;
 			qcom,init-bob-mode = <2>;
 			status = "okay";
@@ -512,6 +578,7 @@
 			qcom,set = <3>;
 			regulator-min-microvolt = <3312000>;
 			regulator-max-microvolt = <3600000>;
+			qcom,init-voltage = <3312000>;
 			qcom,pwm-threshold-current = <2000000>;
 			qcom,init-bob-mode = <2>;
 			qcom,use-pin-ctrl-voltage1;
@@ -522,6 +589,7 @@
 			qcom,set = <3>;
 			regulator-min-microvolt = <3312000>;
 			regulator-max-microvolt = <3600000>;
+			qcom,init-voltage = <3312000>;
 			qcom,pwm-threshold-current = <2000000>;
 			qcom,init-bob-mode = <2>;
 			qcom,use-pin-ctrl-voltage2;
@@ -532,6 +600,7 @@
 			qcom,set = <3>;
 			regulator-min-microvolt = <3312000>;
 			regulator-max-microvolt = <3600000>;
+			qcom,init-voltage = <3312000>;
 			qcom,pwm-threshold-current = <2000000>;
 			qcom,init-bob-mode = <2>;
 			qcom,use-pin-ctrl-voltage3;
