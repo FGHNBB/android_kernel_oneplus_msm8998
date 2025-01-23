@@ -1,4 +1,4 @@
-CONFIG_LOCALVERSION="-perf-TrimedHunter-r4-bpf"
+CONFIG_LOCALVERSION="-perf-TrimedHunter-r5-alpha"
 CONFIG_BPF=y
 CONFIG_HAVE_BPF_JIT=y
 CONFIG_BPF_EVENTS=y
